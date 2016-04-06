@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -10,20 +13,21 @@ namespace SKS_Klient
 {
     class Settings
     {
-        string serversFileName = "servers.txt";
-        string settingsFileName = "settings.xml";
-        public string[] Servers { get; set; }
+        private string serversFileName = "servers.txt";
+        private string settingsFileName = "settings.xml";
+        public ServerCollection Servers { get; set; }
         public string Name { get; set; }
         public string GroupName { get; set; }
         public string IPFilter { get; set; }
+        public string PasswordHash { get; private set; }
         public bool Startup { get; set; }
 
         public void LoadServers()
         {
             if (!File.Exists(serversFileName))
                 throw new FileNotFoundException();
-            Servers = File.ReadAllLines(serversFileName);
-            if (Servers == null || Servers.Length == 0)
+            Servers = new ServerCollection(File.ReadAllLines(serversFileName));
+            if (Servers == null || Servers.Count == 0)
                 throw new Exception();
         }
 
@@ -44,6 +48,8 @@ namespace SKS_Klient
                             Name = reader.Value;
                         else if (currentElement == "GroupName")
                             GroupName = reader.Value;
+                        else if (currentElement == "Password")
+                            PasswordHash = reader.Value;
                         else if (currentElement == "AllowedIPsRegex")
                             IPFilter = reader.Value;
                         else if (currentElement == "Startup")
@@ -55,10 +61,27 @@ namespace SKS_Klient
 
         public void Save(string password)
         {
-            if (Servers == null || Servers.Length == 0)
+            Name = Name.Trim();
+            if (Name.Length == 0)
+                throw new ArgumentException("Nazwa komputera musi zawierać conajmniej 1 znak");
+
+            GroupName = GroupName.Trim();
+            if (Name.Length == 0)
+                throw new ArgumentException("Nazwa grupy musi zawierać conajmniej 1 znak");
+
+            if (password.Length < 5)
+                throw new ArgumentException("Hasło musi zawierać conajmniej 5 znaków");
+
+            IPFilter = IPFilter.Trim();
+            if (IPFilter.Length == 0) // pominięcie tego pola spowoduje akcpetację wszystkich adresów IP
+                IPFilter = ".*";
+            if (!RegexValidator.IsValidRegex(IPFilter))
+                throw new ArgumentException("Akceptowane adresy IP muszą mieć postać wyrażenia regularnego");
+
+            if (Servers == null || Servers.Count == 0)
                 throw new ArgumentException("Brak podanych serwerów");
 
-            /*if (File.Exists(settingsFileName))
+            if (File.Exists(settingsFileName))
                 File.Delete(settingsFileName);
             XmlWriterSettings settings = new XmlWriterSettings();
             settings.Indent = true;
@@ -67,12 +90,28 @@ namespace SKS_Klient
             {
                 writer.WriteStartDocument();
                 writer.WriteStartElement("Settings");
-                writer.WriteElementString("Port", "5000");
-                writer.WriteElementString("DomainsListPath", "domains.txt");
-                writer.WriteElementString("ProcessesListPath", "processes.txt");
+                writer.WriteElementString("Name", Name);
+                writer.WriteElementString("GroupName", GroupName);
+                writer.WriteElementString("Password", CalculateSHA256(password));
+                writer.WriteElementString("AllowedIPsRegex", IPFilter);
+                writer.WriteElementString("Startup", Startup.ToString());
                 writer.WriteEndElement();
                 writer.WriteEndDocument();
-            }*/
+            }
+
+            File.WriteAllLines(serversFileName, Servers.GetStrings());
+        }
+
+        private string CalculateSHA256(string text)
+        {
+            SHA256Managed crypt = new SHA256Managed();
+            StringBuilder hash = new StringBuilder();
+            byte[] crypto = crypt.ComputeHash(Encoding.UTF8.GetBytes(text), 0, Encoding.UTF8.GetByteCount(text));
+            foreach (byte theByte in crypto)
+            {
+                hash.Append(theByte.ToString("x2"));
+            }
+            return hash.ToString();
         }
     }
 }

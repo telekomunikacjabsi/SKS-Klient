@@ -45,7 +45,7 @@ namespace SKS_Klient
                     ipFilterTextBox.Text = settings.IPFilter;
                 }
                 if (serversLoaded)
-                    serversListTextBox.Lines = settings.Servers;
+                    serversListTextBox.Lines = settings.Servers.GetStrings();
             }
         }
 
@@ -76,7 +76,7 @@ namespace SKS_Klient
             settings.GroupName = groupNameTextBox.Text;
             settings.IPFilter = ipFilterTextBox.Text;
             settings.Startup = startupCheckBox.Checked;
-            settings.Servers = serversListTextBox.Lines;
+            settings.Servers = new ServerCollection(serversListTextBox.Lines);
             try
             {
                 settings.Save(passTextBox.Text);
