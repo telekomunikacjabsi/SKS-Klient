@@ -55,7 +55,8 @@ namespace SKS_Klient
 
         public void Save(string password)
         {
-
+            if (Servers == null || Servers.Length == 0)
+                throw new ArgumentException("Brak podanych serwerów");
 
             /*if (File.Exists(settingsFileName))
                 File.Delete(settingsFileName);
