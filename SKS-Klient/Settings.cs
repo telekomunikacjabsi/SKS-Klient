@@ -11,7 +11,7 @@ using System.Xml;
 
 namespace SKS_Klient
 {
-    class Settings
+    public class Settings
     {
         private string serversFileName = "servers.txt";
         private string settingsFileName = "settings.xml";
@@ -59,7 +59,7 @@ namespace SKS_Klient
             }
         }
 
-        public void Save(string password)
+        public void Save(byte[] password)
         {
             Name = Name.Trim();
             if (Name.Length == 0)
@@ -81,6 +81,8 @@ namespace SKS_Klient
             if (Servers == null || Servers.Count == 0)
                 throw new ArgumentException("Brak podanych serwerów");
 
+            PasswordHash = CalculateSHA256(password, Encoding.UTF8.GetBytes(GroupName));
+
             if (File.Exists(settingsFileName))
                 File.Delete(settingsFileName);
             XmlWriterSettings settings = new XmlWriterSettings();
@@ -92,7 +94,7 @@ namespace SKS_Klient
                 writer.WriteStartElement("Settings");
                 writer.WriteElementString("Name", Name);
                 writer.WriteElementString("GroupName", GroupName);
-                writer.WriteElementString("Password", CalculateSHA256(password));
+                writer.WriteElementString("Password", PasswordHash);
                 writer.WriteElementString("AllowedIPsRegex", IPFilter);
                 writer.WriteElementString("Startup", Startup.ToString());
                 writer.WriteEndElement();
@@ -102,11 +104,11 @@ namespace SKS_Klient
             File.WriteAllLines(serversFileName, Servers.GetStrings());
         }
 
-        private string CalculateSHA256(string text)
+        private string CalculateSHA256(byte[] text, byte[] salt)
         {
             SHA256Managed crypt = new SHA256Managed();
             StringBuilder hash = new StringBuilder();
-            byte[] crypto = crypt.ComputeHash(Encoding.UTF8.GetBytes(text), 0, Encoding.UTF8.GetByteCount(text));
+            byte[] crypto = crypt.ComputeHash(text.Concat(salt).ToArray(), 0, text.Length + salt.Length);
             foreach (byte theByte in crypto)
             {
                 hash.Append(theByte.ToString("x2"));

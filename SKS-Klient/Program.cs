@@ -16,7 +16,30 @@ namespace SKS_Klient
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+            Settings settings = new Settings();
+            Worker worker;
+            bool serversLoaded = false;
+            bool settingsLoaded = false;
+            try
+            {
+                settings.LoadServers();
+                serversLoaded = true;
+            }
+            catch
+            { }
+            try
+            {
+                settings.LoadSettings();
+                settingsLoaded = true;
+            }
+            catch
+            { }
+            if (settingsLoaded && serversLoaded) // jeśli wszystkie ustawienia są znane
+                worker = new Worker(settings);
+            else
+            {
+                Application.Run(new MainForm(settings, settingsLoaded, serversLoaded));
+            }
         }
     }
 }

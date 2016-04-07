@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace SKS_Klient
 {
-    class ServerCollection : IEnumerator
+    public class ServerCollection : IEnumerator
     {
         private List<Server> servers;
         private int pointer;

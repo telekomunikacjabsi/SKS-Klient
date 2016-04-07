@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.startupCheckBox = new System.Windows.Forms.CheckBox();
             this.ipFilterTextBox = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
@@ -44,7 +45,6 @@
             this.serversListTextBox = new System.Windows.Forms.RichTextBox();
             this.saveButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
-            this.startupCheckBox = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
@@ -68,6 +68,18 @@
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Ustawienia";
+            // 
+            // startupCheckBox
+            // 
+            this.startupCheckBox.AutoSize = true;
+            this.startupCheckBox.Checked = true;
+            this.startupCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.startupCheckBox.Location = new System.Drawing.Point(192, 131);
+            this.startupCheckBox.Name = "startupCheckBox";
+            this.startupCheckBox.Size = new System.Drawing.Size(161, 17);
+            this.startupCheckBox.TabIndex = 10;
+            this.startupCheckBox.Text = "Uruchamiaj wraz z systemem";
+            this.startupCheckBox.UseVisualStyleBackColor = true;
             // 
             // ipFilterTextBox
             // 
@@ -100,18 +112,18 @@
             this.confirmPassTextBox.Location = new System.Drawing.Point(192, 85);
             this.confirmPassTextBox.MaxLength = 32;
             this.confirmPassTextBox.Name = "confirmPassTextBox";
-            this.confirmPassTextBox.PasswordChar = '*';
             this.confirmPassTextBox.Size = new System.Drawing.Size(168, 20);
             this.confirmPassTextBox.TabIndex = 6;
+            this.confirmPassTextBox.UseSystemPasswordChar = true;
             // 
             // passTextBox
             // 
             this.passTextBox.Location = new System.Drawing.Point(9, 85);
             this.passTextBox.MaxLength = 32;
             this.passTextBox.Name = "passTextBox";
-            this.passTextBox.PasswordChar = '*';
             this.passTextBox.Size = new System.Drawing.Size(168, 20);
             this.passTextBox.TabIndex = 5;
+            this.passTextBox.UseSystemPasswordChar = true;
             // 
             // label4
             // 
@@ -203,18 +215,6 @@
             this.cancelButton.Text = "Anuluj";
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
-            // 
-            // startupCheckBox
-            // 
-            this.startupCheckBox.AutoSize = true;
-            this.startupCheckBox.Checked = true;
-            this.startupCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.startupCheckBox.Location = new System.Drawing.Point(192, 131);
-            this.startupCheckBox.Name = "startupCheckBox";
-            this.startupCheckBox.Size = new System.Drawing.Size(161, 17);
-            this.startupCheckBox.TabIndex = 10;
-            this.startupCheckBox.Text = "Uruchamiaj wraz z systemem";
-            this.startupCheckBox.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
