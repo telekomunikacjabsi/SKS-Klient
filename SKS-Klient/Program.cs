@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SKS_Klient
@@ -11,13 +8,13 @@ namespace SKS_Klient
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
+
+        private static Worker worker;
+
         [STAThread]
         static void Main()
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
             Settings settings = new Settings();
-            Worker worker;
             bool serversLoaded = false;
             bool settingsLoaded = false;
             try
@@ -35,11 +32,19 @@ namespace SKS_Klient
             catch
             { }
             if (settingsLoaded && serversLoaded) // jeśli wszystkie ustawienia są znane
+            {
+                AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
                 worker = new Worker(settings);
+            }
             else
             {
                 Application.Run(new MainForm(settings, settingsLoaded, serversLoaded));
             }
+        }
+
+        static void OnProcessExit(object sender, EventArgs e)
+        {
+            worker.StopWork();
         }
     }
 }
