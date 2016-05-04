@@ -46,6 +46,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdminConnection.cs" />
+    <Compile Include="Command.cs" />
+    <Compile Include="CommandSet.cs" />
+    <Compile Include="Connection.cs" />
+    <Compile Include="ListManager.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -57,7 +62,7 @@
     <Compile Include="RegexValidator.cs" />
     <Compile Include="ScreenshotProvider.cs" />
     <Compile Include="Server.cs" />
-    <Compile Include="ServerCollection.cs" />
+    <Compile Include="ServerConnection.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Worker.cs" />
     <EmbeddedResource Include="MainForm.resx">

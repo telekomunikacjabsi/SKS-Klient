@@ -8,9 +8,10 @@ namespace SKS_Klient
 {
     public partial class MainForm : Form
     {
-        private Settings settings;
+        Settings settings;
+        Worker worker;
 
-        public MainForm(Settings settings, bool settingsLoaded, bool serversLoaded)
+        public MainForm(ref Worker worker, Settings settings, bool settingsLoaded, bool serversLoaded)
         {
             InitializeComponent();
             this.settings = settings;
@@ -21,8 +22,8 @@ namespace SKS_Klient
                 ipFilterTextBox.Text = settings.IPFilter;
             }
             if (serversLoaded)
-                serversListTextBox.Lines = settings.Servers.GetStrings();
-
+                serversListTextBox.Lines = settings.GetServerStrings(settings.Servers);
+            this.worker = worker;
         }
 
         private void cancelButton_Click(object sender, EventArgs e)
@@ -41,11 +42,10 @@ namespace SKS_Klient
             settings.GroupName = groupNameTextBox.Text;
             settings.IPFilter = ipFilterTextBox.Text;
             settings.Startup = startupCheckBox.Checked;
-            settings.Servers = new ServerCollection(serversListTextBox.Lines);
+            settings.Servers = settings.GetServerList(serversListTextBox.Lines);
             try
             {
                 settings.Save(Encoding.UTF8.GetBytes(passTextBox.Text));
-                
             }
             catch (Exception ex)
             {
@@ -57,6 +57,7 @@ namespace SKS_Klient
             {
                 WindowState = FormWindowState.Minimized;
                 ShowInTaskbar = false;
+                worker = new Worker(settings);
             }
             else
                 Application.Exit();

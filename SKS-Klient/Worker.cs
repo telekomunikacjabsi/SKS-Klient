@@ -1,22 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Text.RegularExpressions;
+using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace SKS_Klient
 {
-    class Worker
+    public class Worker
     {
+        ListManager listManager;
         Settings settings;
         Thread mainThread;
-        TcpClient serverConnection;
-        NetworkStream stream;
+        ServerConnection serverConnection;
+        AdminConnection adminConnection;
 
         public Worker(Settings settings)
         {
@@ -27,69 +22,71 @@ namespace SKS_Klient
 
         private void DoWork()
         {
-            serverConnection = ConnectWithServer();
-            stream = serverConnection.GetStream();
-            WriteMessage("CONNECT", "CLIENT", settings.GroupName, settings.PasswordHash);
-            // dalsza obsługa klienta
-        }
-
-        private TcpClient ConnectWithServer()
-        {
+            Debug.WriteLine(settings.PasswordHash);
+            listManager = new ListManager();
             while (true)
             {
-                foreach (Server server in settings.Servers)
+                try
                 {
-                    try
+                    serverConnection = new ServerConnection(settings);
+                    VerifyList(ListID.Domains);
+                    VerifyList(ListID.Processes);
+                    adminConnection = new AdminConnection(settings);
+                    serverConnection.SendMessage(CommandSet.Port, adminConnection.Port);
+                    adminConnection.Listen();
+                    serverConnection.Disconnect(); // po uzyskaniu połączenia z administratorem zrywamy połączenie z serwerem
+                    while (true) // pętla obsługi komunikatów od admina
                     {
-                        return new TcpClient(server.Hostname, server.Port);
-                    }
-                    catch
-                    {
-                        // w przypadku braku dostępności serwera nie robimy nic
+                        try
+                        {
+                            // obsługa komunikatów od administratora
+                            adminConnection.ReceiveMessage();
+                            if (adminConnection.Command == CommandSet.Disconnect)
+                            {
+                                adminConnection.Close();
+                                break;
+                            }
+                        }
+                        catch (IOException) // zerwanie połączenia z adminem
+                        {
+                            adminConnection.Close();
+                            break;
+                        }
                     }
                 }
-                Thread.Sleep(30000);
+                catch (IOException) // jeśli dojdzie do nagłego rozłączenia to próbujemy od nowa
+                {
+                    if (serverConnection != null)
+                        serverConnection.Close();
+                    if (adminConnection != null)
+                        adminConnection.Close();
+                    serverConnection = null;
+                    adminConnection = null;
+                }
+            }
+        }
+
+        private void VerifyList(ListID listID)
+        {
+            serverConnection.SendMessage(CommandSet.VerifyList, ((int)listID).ToString(), listManager.GetListHash(listID));
+            serverConnection.ReceiveMessage();
+            if (serverConnection.Command == CommandSet.List)
+            {
+                listManager.SetListFromString(listID, serverConnection[1]);
+                Console.WriteLine(serverConnection[1]);
             }
         }
 
         public void StopWork()
         {
+            Debug.WriteLine("Zatrzymano pracę klienta");
             if (serverConnection != null && serverConnection.Connected)
             {
-                WriteMessage("DISCONNECT"); // POPRAWIC WYSYLANIE KOMUNIKATU DISCONNECT
-                stream.Close();
+                serverConnection.SendMessage(CommandSet.Disconnect);
                 serverConnection.Close();
             }
             if (mainThread != null && mainThread.IsAlive)
                 mainThread.Abort();
-        }
-
-        private string[] ReceiveMessage()
-        {
-            int i;
-            byte[] bytes = new byte[256];
-            while ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
-            {
-                string msg = Encoding.ASCII.GetString(bytes, 0, i);
-                string[] args = Regex.Split(msg, ";"); // automatyczny podział komunikatu na argumenty
-                for (int j = 0; j < args.Length; j++)
-                    args[j] = args[j].Replace("&sem", ";");
-                return args;
-            }
-            return new string[] { String.Empty };
-        }
-
-        private void WriteMessage(params string[] message)
-        {
-            for (int i = 0; i < message.Length; i++)
-                message[i] = message[i].Replace(";", "&sem"); // usuwa średnik z wiadomości ze względu na ich użycie przy podziale komunikatów
-            _WriteMessage(String.Join(";", message));
-        }
-
-        private void _WriteMessage(string message)
-        {
-            byte[] bytes = Encoding.ASCII.GetBytes(message);
-            stream.Write(bytes, 0, bytes.Length);
         }
     }
 }

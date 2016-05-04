@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace SKS_Klient
@@ -15,7 +12,7 @@ namespace SKS_Klient
     {
         private string serversFileName = "servers.txt";
         private string settingsFileName = "settings.xml";
-        public ServerCollection Servers { get; set; }
+        public List<Server> Servers { get; set; }
         public string Name { get; set; }
         public string GroupName { get; set; }
         public string IPFilter { get; set; }
@@ -26,9 +23,23 @@ namespace SKS_Klient
         {
             if (!File.Exists(serversFileName))
                 throw new FileNotFoundException();
-            Servers = new ServerCollection(File.ReadAllLines(serversFileName));
+            Servers = GetServerList(File.ReadAllLines(serversFileName));
             if (Servers == null || Servers.Count == 0)
                 throw new Exception();
+        }
+
+        public List<Server> GetServerList(string[] data)
+        {
+            List<Server> servers = new List<Server>();
+            foreach (string item in data)
+            {
+                try
+                {
+                    servers.Add(new Server(item));
+                }
+                catch { }
+            }
+            return servers;
         }
 
         public void LoadSettings()
@@ -101,7 +112,17 @@ namespace SKS_Klient
                 writer.WriteEndDocument();
             }
 
-            File.WriteAllLines(serversFileName, Servers.GetStrings());
+            File.WriteAllLines(serversFileName, GetServerStrings(Servers));
+        }
+
+        public string[] GetServerStrings(List<Server> servers)
+        {
+            string[] items = new string[servers.Count];
+            for (int i = 0; i < servers.Count; i++)
+            {
+                items[i] = servers[i].Hostname + ":" + servers[i].Port;
+            }
+            return items;
         }
 
         private string CalculateSHA256(byte[] text, byte[] salt)
