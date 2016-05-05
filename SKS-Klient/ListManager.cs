@@ -40,6 +40,23 @@ namespace SKS_Klient
             }
         }
 
+        public bool IsForbiddenAction(ListID listID, string s)
+        {
+            string[] list = null;
+            if (listID == ListID.Domains)
+                list = disallowedDomains;
+            else if (listID == ListID.Processes)
+                list = disallowedProcesses;
+            if (list == null || list.Length == 0)
+                return false;
+            for (int i = 0; i < list.Length; i++)
+            {
+                if (Regex.IsMatch(list[i], s))
+                    return true;
+            }
+            return false;
+        }
+
         private byte[] CalculateMD5(string[] lines)
         {
             string sum = String.Join(String.Empty, lines);

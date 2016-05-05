@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
+using System.Linq;
 
 namespace SKS_Klient
 {
@@ -37,6 +39,13 @@ namespace SKS_Klient
                 }
                 Close();
             }
+        }
+
+        public void SendMessage(Command command, byte[] bytes)
+        {
+            byte[] commandBytes = Encoding.UTF8.GetBytes(command.Text + ";");
+            bytes = commandBytes.Concat(bytes).ToArray<byte>();
+            stream.Write(bytes, 0, bytes.Length);
         }
     }
 }

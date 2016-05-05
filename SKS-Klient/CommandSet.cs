@@ -11,5 +11,8 @@
         public static readonly Command OK = new Command("OK");
         public static readonly Command List = new Command("LIST", 2);
         public static readonly Command Port = new Command("PORT", 1);
+        public static readonly Command Screenshot = new Command("SCREENSHOT");
+        public static readonly Command Message = new Command("MESSAGE", 1);
+        public static readonly Command Warn = new Command("WARN", 2);
     }
 }

@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using System.Windows.Forms;
 
 namespace SKS_Klient
 {
@@ -12,10 +13,13 @@ namespace SKS_Klient
         Thread mainThread;
         ServerConnection serverConnection;
         AdminConnection adminConnection;
+        Watcher watcher;
 
         public Worker(Settings settings)
         {
             this.settings = settings;
+            listManager = new ListManager();
+            watcher = new Watcher(listManager);
             mainThread = new Thread(DoWork);
             mainThread.Start();
         }
@@ -23,7 +27,6 @@ namespace SKS_Klient
         private void DoWork()
         {
             Debug.WriteLine(settings.PasswordHash);
-            listManager = new ListManager();
             while (true)
             {
                 try
@@ -37,6 +40,7 @@ namespace SKS_Klient
                     serverConnection.Disconnect(); // po uzyskaniu połączenia z administratorem zrywamy połączenie z serwerem
                     while (true) // pętla obsługi komunikatów od admina
                     {
+                        watcher.Start();
                         try
                         {
                             // obsługa komunikatów od administratora
@@ -44,12 +48,18 @@ namespace SKS_Klient
                             if (adminConnection.Command == CommandSet.Disconnect)
                             {
                                 adminConnection.Close();
-                                break;
+                                watcher.Stop();
+                                break; // wznawia procedurę nawiązywania połączeń od nowa
                             }
+                            else if (adminConnection.Command == CommandSet.Screenshot)
+                                SendScreenshot();
+                            else if (adminConnection.Command == CommandSet.Message)
+                                DisplayMessage();
                         }
                         catch (IOException) // zerwanie połączenia z adminem
                         {
                             adminConnection.Close();
+                            watcher.Stop();
                             break;
                         }
                     }
@@ -64,6 +74,17 @@ namespace SKS_Klient
                     adminConnection = null;
                 }
             }
+        }
+
+        private void DisplayMessage()
+        {
+            string message = adminConnection[0].Trim();
+            MessageBox.Show(message, "Wiadomość", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        private void SendScreenshot()
+        {
+            adminConnection.SendMessage(CommandSet.Screenshot, ScreenshotProvider.GetScreenshot());
         }
 
         private void VerifyList(ListID listID)
