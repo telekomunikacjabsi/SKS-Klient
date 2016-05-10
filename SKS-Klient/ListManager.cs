@@ -13,30 +13,30 @@ namespace SKS_Klient
         private const string processesListPath = "processes.txt";
         private string[] disallowedDomains;
         private string[] disallowedProcesses;
-        private byte[] domainsListChecksum;
-        private byte[] processesListChecksum;
+        private string domainsListChecksum;
+        private string processesListChecksum;
 
         public ListManager()
         {
             if (File.Exists(domainsListPath))
             {
                 disallowedDomains = File.ReadAllLines(domainsListPath, Encoding.UTF8).Where(value => RegexValidator.IsValidRegex(value)).ToArray(); // wybieramy tylko reguły które są poprawnymi wyrażeniami regularnymi
-                domainsListChecksum = CalculateMD5(disallowedDomains);
+                domainsListChecksum = CalculateMD5Hash(disallowedDomains);
             }
             else
             {
                 disallowedDomains = new string[] { String.Empty };
-                domainsListChecksum = new byte[] { 0 }; // inicjalizujemy hash jako "pusty"
+                domainsListChecksum = "0";
             }
             if (File.Exists(processesListPath))
             {
                 disallowedProcesses = File.ReadAllLines(processesListPath, Encoding.UTF8).Where(value => RegexValidator.IsValidRegex(value)).ToArray();
-                processesListChecksum = CalculateMD5(disallowedProcesses);
+                processesListChecksum = CalculateMD5Hash(disallowedProcesses);
             }
             else
             {
                 disallowedProcesses = new string[] { String.Empty };
-                processesListChecksum = new byte[] { 0 };
+                processesListChecksum = "0";
             }
         }
 
@@ -57,29 +57,42 @@ namespace SKS_Klient
             return false;
         }
 
-        private byte[] CalculateMD5(string[] lines)
+        private string CalculateMD5Hash(string[] array)
         {
-            string sum = String.Join(String.Empty, lines);
-            var checkSum = MD5.Create();
-            byte[] bytes = Encoding.UTF8.GetBytes(sum.ToString());
-            return checkSum.ComputeHash(bytes);
+            string input = StringArrayToString(array);
+            MD5 md5 = MD5.Create();
+            byte[] inputBytes = Encoding.UTF8.GetBytes(input);
+            byte[] hash = md5.ComputeHash(inputBytes);
+
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < hash.Length; i++)
+            {
+                sb.Append(hash[i].ToString("X2"));
+            }
+            return sb.ToString();
+        }
+
+        private string StringArrayToString(string[] array)
+        {
+            StringBuilder builder = new StringBuilder();
+            foreach (string value in array)
+            {
+                builder.Append(value);
+                builder.Append('.');
+            }
+            return builder.ToString();
         }
 
         public string GetListHash(ListID listID)
         {
             if (listID == ListID.Domains)
-                return Encoding.UTF8.GetString(domainsListChecksum);
+                return domainsListChecksum;
             else if (listID == ListID.Processes)
-                return Encoding.UTF8.GetString(processesListChecksum);
+                return processesListChecksum;
             return "0";
         }
 
-        public bool VerifyList(int listID, string checksum)
-        {
-            return VerifyList((ListID)listID, Encoding.UTF8.GetBytes(checksum));
-        }
-
-        public bool VerifyList(ListID listID, byte[] checksum)
+        public bool VerifyList(ListID listID, string checksum)
         {
             if (listID == ListID.Domains)
                 return checksum == domainsListChecksum;

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
@@ -35,7 +34,7 @@ namespace SKS_Klient
                     serverConnection.Connect(adminConnection.Port);
                     VerifyList(ListID.Domains, "domains");
                     VerifyList(ListID.Processes, "processes");
-                    adminConnection.Listen();
+                    adminConnection.ListenAndConnect();
                     serverConnection.Disconnect(); // po uzyskaniu połączenia z administratorem zrywamy połączenie z serwerem
                     while (true) // pętla obsługi komunikatów od admina
                     {
@@ -57,13 +56,14 @@ namespace SKS_Klient
                         }
                         catch (IOException) // zerwanie połączenia z adminem
                         {
+                            Debug.WriteLine("Rozłączono administratora");
                             adminConnection.Close();
                             watcher.Stop();
                             break;
                         }
                     }
                 }
-                catch (IOException) // jeśli dojdzie do nagłego rozłączenia to próbujemy od nowa
+                catch (IOException)
                 {
                     if (serverConnection != null)
                         serverConnection.Close();
@@ -83,7 +83,7 @@ namespace SKS_Klient
 
         private void SendScreenshot()
         {
-            adminConnection.SendMessage(CommandSet.Screenshot, ScreenshotProvider.GetScreenshot());
+            adminConnection.SendMessageUDP(ScreenshotProvider.GetScreenshot());
         }
 
         private void VerifyList(ListID listID, string s)
@@ -91,10 +91,7 @@ namespace SKS_Klient
             serverConnection.SendMessage(CommandSet.VerifyList, ((int)listID).ToString(), listManager.GetListHash(listID));
             serverConnection.ReceiveMessage();
             if (serverConnection.Command == CommandSet.List)
-            {
                 listManager.SetListFromString(listID, serverConnection[1]);
-                Console.WriteLine("SET");
-            }
         }
 
         public void StopWork()
