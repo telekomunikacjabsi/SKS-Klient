@@ -8,7 +8,7 @@ namespace SKS_Klient
 {
     public class AdminConnection : Connection
     {
-        public string Port { get; }
+        public string Port { get; } // port na którym do klienta może podłączyć się klient
         TcpListener listener;
 
         public AdminConnection(Settings settings) : base(settings)
@@ -39,6 +39,12 @@ namespace SKS_Klient
                 }
                 Close();
             }
+        }
+
+        public void SendMessageUDP(string message)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(message);
+            //udpClient.Send(bytes, bytes.Length);
         }
 
         public void SendMessage(Command command, byte[] bytes)

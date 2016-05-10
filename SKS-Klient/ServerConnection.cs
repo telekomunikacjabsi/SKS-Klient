@@ -11,6 +11,10 @@ namespace SKS_Klient
         public ServerConnection(Settings settings) : base(settings)
         {
             client = new TcpClient();
+        }
+
+        public void Connect(string adminPort)
+        {
             while (true)
             {
                 foreach (Server server in settings.Servers)
@@ -19,7 +23,7 @@ namespace SKS_Klient
                     {
                         client.Connect(server.Hostname, server.Port);
                         stream = client.GetStream();
-                        SendMessage(CommandSet.Connect, "CLIENT", settings.GroupName, settings.PasswordHash);
+                        SendMessage(CommandSet.ServerConnect, "CLIENT", settings.GroupName, settings.PasswordHash, adminPort);
                         ReceiveMessage();
                         if (Command == CommandSet.Auth && parameters[0] == "SUCCESS") // jeśli serwer potwierdza połączenie, kończymy proces połączenia z serwerem
                         {

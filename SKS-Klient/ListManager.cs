@@ -20,7 +20,7 @@ namespace SKS_Klient
         {
             if (File.Exists(domainsListPath))
             {
-                disallowedDomains = File.ReadAllLines(domainsListPath).Where(value => RegexValidator.IsValidRegex(value)).ToArray(); // wybieramy tylko reguły które są poprawnymi wyrażeniami regularnymi
+                disallowedDomains = File.ReadAllLines(domainsListPath, Encoding.UTF8).Where(value => RegexValidator.IsValidRegex(value)).ToArray(); // wybieramy tylko reguły które są poprawnymi wyrażeniami regularnymi
                 domainsListChecksum = CalculateMD5(disallowedDomains);
             }
             else
@@ -30,7 +30,7 @@ namespace SKS_Klient
             }
             if (File.Exists(processesListPath))
             {
-                disallowedProcesses = File.ReadAllLines(processesListPath).Where(value => RegexValidator.IsValidRegex(value)).ToArray();
+                disallowedProcesses = File.ReadAllLines(processesListPath, Encoding.UTF8).Where(value => RegexValidator.IsValidRegex(value)).ToArray();
                 processesListChecksum = CalculateMD5(disallowedProcesses);
             }
             else
@@ -61,22 +61,22 @@ namespace SKS_Klient
         {
             string sum = String.Join(String.Empty, lines);
             var checkSum = MD5.Create();
-            byte[] bytes = Encoding.Default.GetBytes(sum.ToString());
+            byte[] bytes = Encoding.UTF8.GetBytes(sum.ToString());
             return checkSum.ComputeHash(bytes);
         }
 
         public string GetListHash(ListID listID)
         {
             if (listID == ListID.Domains)
-                return Encoding.ASCII.GetString(domainsListChecksum);
+                return Encoding.UTF8.GetString(domainsListChecksum);
             else if (listID == ListID.Processes)
-                return Encoding.ASCII.GetString(processesListChecksum);
+                return Encoding.UTF8.GetString(processesListChecksum);
             return "0";
         }
 
         public bool VerifyList(int listID, string checksum)
         {
-            return VerifyList((ListID)listID, Encoding.ASCII.GetBytes(checksum));
+            return VerifyList((ListID)listID, Encoding.UTF8.GetBytes(checksum));
         }
 
         public bool VerifyList(ListID listID, byte[] checksum)
@@ -87,17 +87,19 @@ namespace SKS_Klient
                 return checksum == processesListChecksum;
             return false;
         }
+
         public void SetListFromString(ListID listID, string listString)
         {
+            listString = listString.Trim();
             if (listID == ListID.Domains)
             {
-                disallowedDomains = Regex.Split(listString, Environment.NewLine);
-                File.WriteAllLines(domainsListPath, disallowedDomains);
+                disallowedDomains = listString.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
+                File.WriteAllText(domainsListPath, listString, Encoding.UTF8);
             }
             else if (listID == ListID.Processes)
             {
-                disallowedProcesses = Regex.Split(listString, Environment.NewLine);
-                File.WriteAllLines(processesListPath, disallowedProcesses);
+                disallowedProcesses = listString.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
+                File.WriteAllText(processesListPath, listString, Encoding.UTF8);
             }
         }
 

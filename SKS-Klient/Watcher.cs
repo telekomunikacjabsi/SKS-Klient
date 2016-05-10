@@ -17,7 +17,6 @@ namespace SKS_Klient
         {
             this.listManager = listManager;
             isWorking = false;
-            thread = new Thread(DoWork);
         }
 
         public void Start()
@@ -25,6 +24,7 @@ namespace SKS_Klient
             if (isWorking)
                 return;
             isWorking = true;
+            thread = new Thread(DoWork);
             thread.Start();
         }
 
@@ -41,7 +41,7 @@ namespace SKS_Klient
             if (!isWorking)
                 return;
             isWorking = false;
-            if (thread.IsAlive)
+            if (thread != null && thread.IsAlive)
                 thread.Abort();
         }
     }

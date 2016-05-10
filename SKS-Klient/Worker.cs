@@ -26,16 +26,15 @@ namespace SKS_Klient
 
         private void DoWork()
         {
-            Debug.WriteLine(settings.PasswordHash);
             while (true)
             {
                 try
                 {
                     serverConnection = new ServerConnection(settings);
-                    VerifyList(ListID.Domains);
-                    VerifyList(ListID.Processes);
                     adminConnection = new AdminConnection(settings);
-                    serverConnection.SendMessage(CommandSet.Port, adminConnection.Port);
+                    serverConnection.Connect(adminConnection.Port);
+                    VerifyList(ListID.Domains, "domains");
+                    VerifyList(ListID.Processes, "processes");
                     adminConnection.Listen();
                     serverConnection.Disconnect(); // po uzyskaniu połączenia z administratorem zrywamy połączenie z serwerem
                     while (true) // pętla obsługi komunikatów od admina
@@ -47,8 +46,8 @@ namespace SKS_Klient
                             adminConnection.ReceiveMessage();
                             if (adminConnection.Command == CommandSet.Disconnect)
                             {
-                                adminConnection.Close();
                                 watcher.Stop();
+                                adminConnection.Close();
                                 break; // wznawia procedurę nawiązywania połączeń od nowa
                             }
                             else if (adminConnection.Command == CommandSet.Screenshot)
@@ -87,14 +86,14 @@ namespace SKS_Klient
             adminConnection.SendMessage(CommandSet.Screenshot, ScreenshotProvider.GetScreenshot());
         }
 
-        private void VerifyList(ListID listID)
+        private void VerifyList(ListID listID, string s)
         {
             serverConnection.SendMessage(CommandSet.VerifyList, ((int)listID).ToString(), listManager.GetListHash(listID));
             serverConnection.ReceiveMessage();
             if (serverConnection.Command == CommandSet.List)
             {
                 listManager.SetListFromString(listID, serverConnection[1]);
-                Console.WriteLine(serverConnection[1]);
+                Console.WriteLine("SET");
             }
         }
 
