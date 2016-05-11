@@ -25,7 +25,7 @@ namespace SKS_Klient
         {
             string[] messages = null;
             int i;
-            Command = new Command(String.Empty); // zastąpić stałą null
+            Command = null;
             byte[] bytes = new byte[256];
             parameters = null;
             if ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
@@ -38,6 +38,7 @@ namespace SKS_Klient
                 messages = SplitMessages(message);
                 message = messages[0];
                 string[] args = Regex.Split(message, ";"); // automatyczny podział komunikatu na argumenty
+                ReplaceInArray(args, "%1", ";");
                 if (args.Length > 1)
                 {
                     parameters = new string[args.Length - 1];
@@ -67,6 +68,7 @@ namespace SKS_Klient
             }
             for (int i = 0; i < parameters.Length; i++)
                 parameters[i] = parameters[i].Trim();
+            ReplaceInArray(parameters, ";", "%1");
             string msg = String.Join(";", command.Text, String.Join(";", parameters)) + packetEndSign;
             byte[] bytes = Encoding.UTF8.GetBytes(msg);
             try
@@ -79,6 +81,12 @@ namespace SKS_Klient
                 Console.WriteLine(ex.Message);
                 return;
             }
+        }
+
+        private void ReplaceInArray(string[] array, string replaceFrom, string replaceTo)
+        {
+            for (int i = 0; i < array.Length; i++)
+                array[i] = array[i].Replace(replaceFrom, replaceTo);
         }
 
         private string[] SplitMessages(string message)

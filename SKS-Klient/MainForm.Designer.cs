@@ -88,6 +88,7 @@
             this.ipFilterTextBox.Name = "ipFilterTextBox";
             this.ipFilterTextBox.Size = new System.Drawing.Size(168, 20);
             this.ipFilterTextBox.TabIndex = 9;
+            this.ipFilterTextBox.Text = ".*";
             // 
             // label6
             // 

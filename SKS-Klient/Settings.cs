@@ -10,8 +10,8 @@ namespace SKS_Klient
 {
     public class Settings
     {
-        private string serversFileName = "servers.txt";
-        private string settingsFileName = "settings.xml";
+        private string serversListFilePath = "servers.txt";
+        private string settingsFilePath = "settings.xml";
         public List<Server> Servers { get; set; }
         public string Name { get; set; }
         public string GroupName { get; set; }
@@ -21,9 +21,9 @@ namespace SKS_Klient
 
         public void LoadServers()
         {
-            if (!File.Exists(serversFileName))
+            if (!File.Exists(serversListFilePath))
                 throw new FileNotFoundException();
-            Servers = GetServerList(File.ReadAllLines(serversFileName));
+            Servers = GetServerList(File.ReadAllLines(serversListFilePath));
             if (Servers == null || Servers.Count == 0)
                 throw new Exception();
         }
@@ -44,9 +44,9 @@ namespace SKS_Klient
 
         public void LoadSettings()
         {
-            if (!File.Exists(settingsFileName))
+            if (!File.Exists(settingsFilePath))
                 throw new FileNotFoundException();
-            using (XmlReader reader = new XmlTextReader(settingsFileName))
+            using (XmlReader reader = new XmlTextReader(settingsFilePath))
             {
                 string currentElement = String.Empty;
                 while (reader.Read())
@@ -94,8 +94,8 @@ namespace SKS_Klient
 
             PasswordHash = CalculateSHA256(password, Encoding.UTF8.GetBytes(GroupName));
 
-            if (File.Exists(settingsFileName))
-                File.Delete(settingsFileName);
+            if (File.Exists(settingsFilePath))
+                File.Delete(settingsFilePath);
             XmlWriterSettings settings = new XmlWriterSettings();
             settings.Indent = true;
             settings.IndentChars = "\t";
@@ -112,7 +112,7 @@ namespace SKS_Klient
                 writer.WriteEndDocument();
             }
 
-            File.WriteAllLines(serversFileName, GetServerStrings(Servers));
+            File.WriteAllLines(serversListFilePath, GetServerStrings(Servers));
         }
 
         public string[] GetServerStrings(List<Server> servers)

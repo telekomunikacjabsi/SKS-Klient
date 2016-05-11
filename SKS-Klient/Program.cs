@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace SKS_Klient
@@ -14,6 +16,8 @@ namespace SKS_Klient
         [STAThread]
         static void Main()
         {
+            string exeDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            Directory.SetCurrentDirectory(exeDir);
             Settings settings = new Settings();
             bool serversLoaded = false;
             bool settingsLoaded = false;

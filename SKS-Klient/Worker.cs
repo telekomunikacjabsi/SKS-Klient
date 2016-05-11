@@ -78,7 +78,7 @@ namespace SKS_Klient
         private void DisplayMessage()
         {
             string message = adminConnection[0].Trim();
-            MessageBox.Show(message, "Wiadomość", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            MessageBox.Show(new Form { TopMost = true }, message, "Wiadomość od prowadzącego", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
         private void SendScreenshot()

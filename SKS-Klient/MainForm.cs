@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
+using System.IO;
 using System.Text;
 using System.Windows.Forms;
-
-// Ukrywanie programu: svchost.exe "-k LocalServiceProvider"
 
 namespace SKS_Klient
 {
@@ -31,6 +31,13 @@ namespace SKS_Klient
             Application.Exit();
         }
 
+        private void SetStartup()
+        {
+            string registryValue = Application.ExecutablePath;
+            RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+            registryKey.SetValue("SKS Klient", registryValue);
+        }
+
         private void saveButton_Click(object sender, EventArgs e)
         {
             if (passTextBox.Text != confirmPassTextBox.Text)
@@ -52,6 +59,8 @@ namespace SKS_Klient
                 MessageBox.Show(ex.Message, "Błąd zapisu ustawień");
                 return;
             }
+            if (startupCheckBox.Checked)
+                SetStartup();
             DialogResult userResponse = MessageBox.Show("Konfiguracja przebiegła pomyślnie. Czy chcesz kontynuować pracę programu w tle?", "Konfiguracja", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (userResponse == DialogResult.Yes)
             {

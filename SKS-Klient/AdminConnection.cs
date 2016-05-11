@@ -39,7 +39,7 @@ namespace SKS_Klient
                     }
                     if (passwordHash  == settings.PasswordHash)
                     {
-                        SendMessage(CommandSet.Auth, "SUCCESS");
+                        SendMessage(CommandSet.Auth, "SUCCESS", settings.Name);
                         Debug.WriteLine("Połączono administratora");
                         return;
                     }
