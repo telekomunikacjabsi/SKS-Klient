@@ -14,18 +14,20 @@ namespace SKS_Klient
         protected Settings settings;
         readonly string packetEndSign = "!$"; // znacznik końca pakietu
         string message;
+        object locker;
 
         public Connection(Settings settings)
         {
             this.settings = settings;
             message = String.Empty;
+            locker = new object();
         }
 
         public void ReceiveMessage(bool recurrentCall = false)
         {
             string[] messages = null;
             int i;
-            Command = null;
+            Command = new Command(String.Empty);
             byte[] bytes = new byte[256];
             parameters = null;
             if ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
@@ -73,8 +75,10 @@ namespace SKS_Klient
             byte[] bytes = Encoding.UTF8.GetBytes(msg);
             try
             {
-                stream.Write(bytes, 0, bytes.Length);
-
+                lock (locker)
+                {
+                    stream.Write(bytes, 0, bytes.Length);
+                }
             }
             catch (Exception ex)
             {
