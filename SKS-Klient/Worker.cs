@@ -83,7 +83,7 @@ namespace SKS_Klient
 
         private void SendScreenshot()
         {
-            adminConnection.SendMessageUDP(ScreenshotProvider.GetScreenshot());
+            adminConnection.SendMessage(CommandSet.Screenshot, ScreenshotProvider.GetScreenshot());
         }
 
         private void VerifyList(ListID listID, string s)

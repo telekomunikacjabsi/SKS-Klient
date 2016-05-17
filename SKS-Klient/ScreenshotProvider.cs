@@ -15,7 +15,8 @@ namespace SKS_Klient
             screenshot.CopyFromScreen(Screen.PrimaryScreen.Bounds.X, Screen.PrimaryScreen.Bounds.Y, 0, 0, Screen.PrimaryScreen.Bounds.Size, CopyPixelOperation.SourceCopy);
             ImageConverter converter = new ImageConverter();
             byte[] screenshotBytes = (byte[])converter.ConvertTo(bitmap, typeof(byte[]));
-            return Compress(screenshotBytes);
+            return screenshotBytes;
+            //return Compress(screenshotBytes);
         }
 
         private static byte[] Compress(byte[] oryginalBytes)

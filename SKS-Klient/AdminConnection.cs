@@ -3,14 +3,12 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Linq;
-using System;
 
 namespace SKS_Klient
 {
     public class AdminConnection : Connection
     {
         public string Port { get; } // port na którym do klienta może podłączyć się klient
-        UdpClient udpClient = null;
         TcpListener listener;
 
         public AdminConnection(Settings settings) : base(settings)
@@ -31,12 +29,6 @@ namespace SKS_Klient
                 if (Command == CommandSet.AdminConnect)
                 {
                     string passwordHash = parameters[0];
-                    int udpPort = 0;
-                    if (Int32.TryParse(parameters[1], out udpPort))
-                    {
-                        string ipAddress = ((IPEndPoint)client.Client.RemoteEndPoint).Address.ToString();
-                        udpClient = new UdpClient(ipAddress, udpPort);
-                    }
                     if (passwordHash  == settings.PasswordHash)
                     {
                         SendMessage(CommandSet.Auth, "SUCCESS", settings.Name);
@@ -47,13 +39,6 @@ namespace SKS_Klient
                 }
                 Close();
             }
-        }
-
-        public void SendMessageUDP(byte[] bytes)
-        {
-            if (udpClient == null)
-                return;
-            udpClient.Send(bytes, bytes.Length);
         }
 
         public void SendMessage(Command command, byte[] bytes)
