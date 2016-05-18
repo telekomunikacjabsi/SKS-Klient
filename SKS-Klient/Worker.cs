@@ -53,6 +53,12 @@ namespace SKS_Klient
                                 SendScreenshot();
                             else if (adminConnection.Command == CommandSet.Message)
                                 DisplayMessage();
+                            else
+                            {
+                                watcher.Stop();
+                                adminConnection.Close();
+                                break;
+                            }
                         }
                         catch (IOException) // zerwanie połączenia z adminem
                         {

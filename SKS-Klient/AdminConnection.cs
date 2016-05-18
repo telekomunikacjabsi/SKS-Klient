@@ -31,13 +31,16 @@ namespace SKS_Klient
                     string passwordHash = parameters[0];
                     if (passwordHash  == settings.PasswordHash)
                     {
+                        listener.Stop();
                         SendMessage(CommandSet.Auth, "SUCCESS", settings.Name);
                         Debug.WriteLine("Połączono administratora");
                         return;
                     }
-                    SendMessage(CommandSet.Auth, "FAIL");
+                    else
+                        SendMessage(CommandSet.Auth, "FAIL");
                 }
-                Close();
+                else
+                    Close();
             }
         }
 
