@@ -49,6 +49,8 @@ namespace SKS_Klient
             byte[] commandBytes = Encoding.UTF8.GetBytes(command.Text + ";");
             bytes = commandBytes.Concat(bytes).ToArray<byte>();
             stream.Write(bytes, 0, bytes.Length);
+            byte[] endSign = Encoding.UTF8.GetBytes(packetEndSign);
+            stream.Write(endSign, 0, endSign.Length);
         }
     }
 }

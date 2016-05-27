@@ -12,7 +12,7 @@ namespace SKS_Klient
         protected NetworkStream stream;
         protected string[] parameters;
         protected Settings settings;
-        readonly string packetEndSign = "!$"; // znacznik końca pakietu
+        protected readonly string packetEndSign = "!$"; // znacznik końca pakietu
         string message;
         object locker;
 
