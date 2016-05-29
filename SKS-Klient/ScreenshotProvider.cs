@@ -2,6 +2,7 @@
 using System.Drawing.Imaging;
 using System.IO;
 using System.IO.Compression;
+using System.Text;
 using System.Windows.Forms;
 
 namespace SKS_Klient
@@ -15,6 +16,7 @@ namespace SKS_Klient
             screenshot.CopyFromScreen(Screen.PrimaryScreen.Bounds.X, Screen.PrimaryScreen.Bounds.Y, 0, 0, Screen.PrimaryScreen.Bounds.Size, CopyPixelOperation.SourceCopy);
             ImageConverter converter = new ImageConverter();
             byte[] screenshotBytes = (byte[])converter.ConvertTo(bitmap, typeof(byte[]));
+            MessageBox.Show(Encoding.UTF8.GetString(screenshotBytes));
             return screenshotBytes;
             //return Compress(screenshotBytes);
         }

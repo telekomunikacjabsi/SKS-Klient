@@ -3,6 +3,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Linq;
+using System.Collections.Generic;
+using System;
 
 namespace SKS_Klient
 {
@@ -46,11 +48,10 @@ namespace SKS_Klient
 
         public void SendMessage(Command command, byte[] bytes)
         {
-            byte[] commandBytes = Encoding.UTF8.GetBytes(command.Text + ";");
-            bytes = commandBytes.Concat(bytes).ToArray<byte>();
+            string bytesLenght = bytes.Length.ToString();
+            byte[] header = Encoding.UTF8.GetBytes(bytesLenght + ";");
+            stream.Write(header, 0, header.Length);
             stream.Write(bytes, 0, bytes.Length);
-            byte[] endSign = Encoding.UTF8.GetBytes(packetEndSign);
-            stream.Write(endSign, 0, endSign.Length);
         }
     }
 }
