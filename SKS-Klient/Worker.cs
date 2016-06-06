@@ -12,13 +12,11 @@ namespace SKS_Klient
         Thread mainThread;
         ServerConnection serverConnection;
         AdminConnection adminConnection;
-        Watcher watcher;
 
         public Worker(Settings settings)
         {
             this.settings = settings;
             listManager = new ListManager();
-            watcher = new Watcher(listManager);
             mainThread = new Thread(DoWork);
             mainThread.Start();
         }
@@ -38,14 +36,12 @@ namespace SKS_Klient
                     serverConnection.Disconnect(); // po uzyskaniu połączenia z administratorem zrywamy połączenie z serwerem
                     while (true) // pętla obsługi komunikatów od admina
                     {
-                        watcher.Start();
                         try
                         {
                             // obsługa komunikatów od administratora
                             adminConnection.ReceiveMessage();
                             if (adminConnection.Command == CommandSet.Disconnect)
                             {
-                                watcher.Stop();
                                 adminConnection.Close();
                                 break; // wznawia procedurę nawiązywania połączeń od nowa
                             }
@@ -55,7 +51,6 @@ namespace SKS_Klient
                                 DisplayMessage();
                             else
                             {
-                                watcher.Stop();
                                 adminConnection.Close();
                                 break;
                             }
@@ -64,7 +59,6 @@ namespace SKS_Klient
                         {
                             Debug.WriteLine("Rozłączono administratora");
                             adminConnection.Close();
-                            watcher.Stop();
                             break;
                         }
                     }
