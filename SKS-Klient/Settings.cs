@@ -74,14 +74,20 @@ namespace SKS_Klient
         {
             Name = Name.Trim();
             if (Name.Length == 0)
-                throw new ArgumentException("Nazwa komputera musi zawierać conajmniej 1 znak");
+                throw new ArgumentException("Nazwa komputera musi zawierać co najmniej 1 znak");
+
+            if (Name.Length > 32)
+                throw new ArgumentException("Nazwa komputera musi być krótsza niż 32 znaki");
 
             GroupName = GroupName.Trim();
-            if (Name.Length == 0)
-                throw new ArgumentException("Nazwa grupy musi zawierać conajmniej 1 znak");
+            if (GroupName.Length == 0)
+                throw new ArgumentException("Nazwa grupy musi zawierać co najmniej 1 znak");
+
+            if (GroupName.Length > 32)
+                throw new ArgumentException("Nazwa grupy musi być krótsza niż 32 znaki");
 
             if (password.Length < 5)
-                throw new ArgumentException("Hasło musi zawierać conajmniej 5 znaków");
+                throw new ArgumentException("Hasło musi zawierać co najmniej 5 znaków");
 
             IPFilter = IPFilter.Trim();
             if (IPFilter.Length == 0) // pominięcie tego pola spowoduje akcpetację wszystkich adresów IP
