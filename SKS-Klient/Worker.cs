@@ -7,7 +7,6 @@ namespace SKS_Klient
 {
     public class Worker
     {
-        ListManager listManager;
         Settings settings;
         Thread mainThread;
         ServerConnection serverConnection;
@@ -16,7 +15,6 @@ namespace SKS_Klient
         public Worker(Settings settings)
         {
             this.settings = settings;
-            listManager = new ListManager();
             mainThread = new Thread(DoWork);
             mainThread.Start();
         }
@@ -30,8 +28,6 @@ namespace SKS_Klient
                     serverConnection = new ServerConnection(settings);
                     adminConnection = new AdminConnection(settings);
                     serverConnection.Connect(adminConnection.Port);
-                    VerifyList(ListID.Domains, "domains");
-                    VerifyList(ListID.Processes, "processes");
                     adminConnection.ListenAndConnect();
                     serverConnection.Disconnect(); // po uzyskaniu połączenia z administratorem zrywamy połączenie z serwerem
                     while (true) // pętla obsługi komunikatów od admina
@@ -84,14 +80,6 @@ namespace SKS_Klient
         private void SendScreenshot()
         {
             adminConnection.SendMessage(CommandSet.Screenshot, ScreenshotProvider.GetScreenshot());
-        }
-
-        private void VerifyList(ListID listID, string s)
-        {
-            serverConnection.SendMessage(CommandSet.VerifyList, ((int)listID).ToString(), listManager.GetListHash(listID));
-            serverConnection.ReceiveMessage();
-            if (serverConnection.Command == CommandSet.List)
-                listManager.SetListFromString(listID, serverConnection[1]);
         }
 
         public void StopWork()
