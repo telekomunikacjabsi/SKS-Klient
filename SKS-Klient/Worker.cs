@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
@@ -45,6 +47,8 @@ namespace SKS_Klient
                                 SendScreenshot();
                             else if (adminConnection.Command == CommandSet.Message)
                                 DisplayMessage();
+                            else if (adminConnection.Command == CommandSet.Processes)
+                                SendProcessesList();
                             else
                             {
                                 adminConnection.Close();
@@ -69,6 +73,19 @@ namespace SKS_Klient
                     adminConnection = null;
                 }
             }
+        }
+
+        private void SendProcessesList()
+        {
+            Process[] processes = Process.GetProcesses();
+            List<string> processNames = new List<string>();
+            foreach (var process in processes)
+            {
+                string name = process.MainWindowTitle.Trim();
+                if (!String.IsNullOrEmpty(name))
+                    processNames.Add(name);
+            }
+            adminConnection.SendMessage(CommandSet.Processes, processNames.ToArray());
         }
 
         private void DisplayMessage()

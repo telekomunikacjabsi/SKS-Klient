@@ -2,9 +2,6 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Linq;
-using System.Collections.Generic;
-using System;
 
 namespace SKS_Klient
 {

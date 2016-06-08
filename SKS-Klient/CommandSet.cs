@@ -14,5 +14,6 @@
         public static readonly Command Message = new Command("MESSAGE", 1);
         public static readonly Command Warn = new Command("WARN", 2);
         public static readonly Command LongMessage = new Command("LONG_MSG", 1);
+        public static readonly Command Processes = new Command("PROCESSES");
     }
 }
